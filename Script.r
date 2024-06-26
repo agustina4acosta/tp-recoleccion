@@ -3,12 +3,13 @@ library(readr)
 install.packages("dplyr")
 library(dplyr)
 library(stringr)
+
 atencion_ciudadano <- read_delim(
   ruta_archivo,
-  delim = ";",  # Ajustar el delimitador según el archivo
+  delim = ";",  
   locale = locale(encoding = "UTF-8"),
-  col_names = TRUE,  # Asegurarse de que el archivo tenga nombres de columnas
-  trim_ws = TRUE  # Eliminar espacios en blanco adicionales alrededor de los datos
+  col_names = TRUE,  
+  trim_ws = TRUE 
 )
 str(atencion_ciudadano)
 names(atencion_ciudadano)
@@ -43,6 +44,7 @@ atencion_ciudadano <- atencion_ciudadano %>%
 
 #Cantidad de datos cuyo tipo_prestación sea "solicitud" categoria = "alumbrado" y subcategoria
 #"reparación de luminaria
+
 tipo_prestación_solicitud <- atencion_ciudadano %>%
   filter(tipo_prestacion == "SOLICITUD")%>%
   summarise(cantidad_contactos = n())
@@ -58,11 +60,13 @@ sub_categoria <- atencion_ciudadano %>%
 filter( grepl("REPARACIÓN DE LUMINARIA", subcategoria, ignore.case = TRUE)) %>%
 select(subcategoria) %>%
 summarise(cantidad_contactos = n())
+
 #Por domicilio_barrio en el mes de junio de 2021 mes con mayor cant de contactos cuyo
 #tipo_prestacion sea "denuncia"
+
 contactos_junio_denuncia <- atencion_ciudadano %>%
   filter(
-     MES == "06", # Filtrar por el mes de junio (cambiar según el número de mes correspondiente)
+     MES == "06", 
     tipo_prestacion == "DENUNCIA"
   )
 
@@ -73,12 +77,15 @@ barrio_con_mas_denuncias <- contactos_junio_denuncia %>%
   arrange(desc(cantidad_contactos)) %>%
   slice(1) 
 #Valor de media, mediana, varianza y desviacion estandar correspondiente a la cantidad de contactos por mes
-head(atencion_ciudadano)
-estadistica_por_mes <- atencion_ciudadano %>%
+
+library(modeest)
+conteo_por_mes <- atencion_ciudadano %>%
   group_by(MES) %>%
+  summarise(cantidad_contactos = n())
+estadisticas <- conteo_por_mes %>%
   summarise(
-    media = mean(n(), na.rm = TRUE),
-    mediana = median(n(), na.rm = TRUE),
-    varianza = var(n(), na.rm = TRUE),
-    desviacion_estandar = sd(n(), na.rm = TRUE)
+    media = mean(cantidad_contactos, na.rm = TRUE),
+    mediana = median(cantidad_contactos, na.rm = TRUE),
+    varianza = var(cantidad_contactos, na.rm = TRUE),
+    desviacion_estandar = sd(cantidad_contactos, na.rm = TRUE)
   )
