@@ -2,6 +2,7 @@ ruta_archivo <- "C:/Users/finnegans/Downloads/sistema-unico-de-atencion-ciudadan
 library(readr)
 install.packages("dplyr")
 library(dplyr)
+library(stringr)
 atencion_ciudadano <- read_delim(
   ruta_archivo,
   delim = ";",  # Ajustar el delimitador según el archivo
@@ -48,6 +49,36 @@ tipo_prestación_solicitud <- atencion_ciudadano %>%
 categoria <- atencion_ciudadano %>%
   filter(categoria == "ALUMBRADO") %>%
   summarise(cantidad_contanctos = n())
+atencion_ciudadano <- atencion_ciudadano %>%
+  mutate(
+    subcategoria = trimws(subcategoria)
+  )
+
 sub_categoria <- atencion_ciudadano %>%
-  filter(subcategoria == "REPARACION DE ALUMBRADO")
+filter( grepl("REPARACIÓN DE LUMINARIA", subcategoria, ignore.case = TRUE)) %>%
+select(subcategoria) %>%
 summarise(cantidad_contactos = n())
+#Por domicilio_barrio en el mes de junio de 2021 mes con mayor cant de contactos cuyo
+#tipo_prestacion sea "denuncia"
+contactos_junio_denuncia <- atencion_ciudadano %>%
+  filter(
+     MES == "06", # Filtrar por el mes de junio (cambiar según el número de mes correspondiente)
+    tipo_prestacion == "DENUNCIA"
+  )
+
+# Obtener el barrio con la mayor cantidad de contactos de denuncia en junio de 2021
+barrio_con_mas_denuncias <- contactos_junio_denuncia %>%
+  group_by(domicilio_barrio) %>%
+  summarise(cantidad_contactos = n()) %>%
+  arrange(desc(cantidad_contactos)) %>%
+  slice(1) 
+#Valor de media, mediana, varianza y desviacion estandar correspondiente a la cantidad de contactos por mes
+head(atencion_ciudadano)
+estadistica_por_mes <- atencion_ciudadano %>%
+  group_by(MES) %>%
+  summarise(
+    media = mean(n(), na.rm = TRUE),
+    mediana = median(n(), na.rm = TRUE),
+    varianza = var(n(), na.rm = TRUE),
+    desviacion_estandar = sd(n(), na.rm = TRUE)
+  )
