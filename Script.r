@@ -29,3 +29,25 @@ cantidad_contactos_por_tipo_categoria <- atencion_ciudadano %>%
   filter(tipo_prestacion != "" & !is.na(tipo_prestacion) & categoria != "" & !is.na(categoria)) %>%
   summarise(cantidad_contactos= n())
 
+remove_accents <- function(text) {
+  iconv(text, from = "UTF-8", to = "ASCII//TRANSLIT")
+}
+
+atencion_ciudadano <- atencion_ciudadano %>%
+  mutate(
+    tipo_prestacion = trimws(toupper(remove_accents(as.character(tipo_prestacion)))),
+    categoria = trimws(toupper(remove_accents(as.character(categoria)))),
+    subcategoria = trimws(toupper(remove_accents(as.character(subcategoria))))
+  )
+
+#Cantidad de datos cuyo tipo_prestación sea "solicitud" categoria = "alumbrado" y subcategoria
+#"reparación de luminaria
+tipo_prestación_solicitud <- atencion_ciudadano %>%
+  filter(tipo_prestacion == "SOLICITUD")%>%
+  summarise(cantidad_contactos = n())
+categoria <- atencion_ciudadano %>%
+  filter(categoria == "ALUMBRADO") %>%
+  summarise(cantidad_contanctos = n())
+sub_categoria <- atencion_ciudadano %>%
+  filter(subcategoria == "REPARACION DE ALUMBRADO")
+summarise(cantidad_contactos = n())
